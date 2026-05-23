@@ -18,26 +18,30 @@ TOTAL_MAXIMO_LOCALES = 20
 ANCHO_FIJO = 5
 
 # ============ CONFIGURACIÓN DE PASAJES (RANGOS DE IDS) ============
+# Cada sector tiene un rango de IDs predefinido
 RANGOS_IDS = {
-    1: {"sector": "Frutas y Verduras", "inicio": 9, "fin": 16, "icono": "🥬"},
-    2: {"sector": "Carnes", "inicio": 1, "fin": 8, "icono": "🥩"},
-    3: {"sector": "Textiles", "inicio": 17, "fin": 20, "icono": "👕"}
+    1: {"sector": "Frutas y Verduras", "inicio": 9, "fin": 16, "icono": "🥬"},      # IDs 9 al 16
+    2: {"sector": "Carnes", "inicio": 1, "fin": 8, "icono": "🥩"},                   # IDs 1 al 8
+    3: {"sector": "Textiles", "inicio": 17, "fin": 20, "icono": "👕"}                # IDs 17 al 20
 }
 
 def obtener_sector_por_id(id_puesto):
+    """Devuelve el sector al que pertenece un ID según su rango"""
     for sector_id, rango in RANGOS_IDS.items():
         if rango["inicio"] <= id_puesto <= rango["fin"]:
             return sector_id, rango["sector"], rango["icono"]
     return None, "Desconocido", "❓"
 
 def siguiente_id_disponible(id_sector):
+    """Obtiene el siguiente ID libre dentro del rango del sector"""
     datos = leer_datos()
     rango = RANGOS_IDS[id_sector]
     ids_ocupados = [p["id"] for p in datos["puestos"]]
+    
     for id_posible in range(rango["inicio"], rango["fin"] + 1):
         if id_posible not in ids_ocupados:
             return id_posible
-    return None
+    return None  # No hay IDs disponibles en ese rango
 
 # ============ HTML DE LA INTERFAZ WEB ============
 INTERFAZ_HTML = '''
@@ -51,30 +55,28 @@ INTERFAZ_HTML = '''
         body { 
             font-family: 'Segoe UI', Arial, sans-serif; 
             margin: 0;
-            background: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
         .container { 
             max-width: 1200px; 
             margin: auto; 
-            background: #ffffff;
-            border-radius: 12px;
+            background: white;
+            border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
         h1 { 
-            color: #2c3e50; 
+            color: #333; 
             text-align: center;
-            border-bottom: 2px solid #bdc3c7;
+            border-bottom: 3px solid #667eea;
             padding-bottom: 10px;
         }
         h2 { 
-            color: #34495e; 
+            color: #667eea; 
             font-size: 1.3em;
             margin-top: 25px;
-            border-left: 4px solid #7f8c8d;
-            padding-left: 12px;
         }
         input, select, button { 
             display: block; 
@@ -86,53 +88,39 @@ INTERFAZ_HTML = '''
             border-radius: 8px;
         }
         button { 
-            background: #34495e;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white; 
             cursor: pointer; 
             font-weight: bold;
             border: none;
-            transition: background 0.2s;
+            transition: transform 0.2s;
         }
         button:hover {
-            background: #2c3e50;
+            transform: scale(1.02);
         }
         .btn-ver {
-            background: #5d6d3a;
-        }
-        .btn-ver:hover {
-            background: #4a5a2e;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            margin: 5px 0;
         }
         .btn-menu {
-            background: #7f8c8d;
-        }
-        .btn-menu:hover {
-            background: #6c7a7a;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
         .btn-aumentar {
-            background: #5d6d3a;
-        }
-        .btn-aumentar:hover {
-            background: #4a5a2e;
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
         }
         .btn-reducir {
-            background: #b8543a;
-        }
-        .btn-reducir:hover {
-            background: #9e4630;
+            background: linear-gradient(135deg, #e67e22 0%, #f39c12 100%);
         }
         .btn-eliminar {
-            background: #a93226;
-        }
-        .btn-eliminar:hover {
-            background: #8b2419;
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
         }
         hr { 
             margin: 25px 0; 
             border: none;
-            border-top: 1px solid #ecf0f1;
+            border-top: 2px dashed #ddd;
         }
         .badge {
-            background: #7f8c8d;
+            background: #667eea;
             color: white;
             padding: 5px 10px;
             border-radius: 20px;
@@ -141,11 +129,11 @@ INTERFAZ_HTML = '''
             margin-bottom: 10px;
         }
         .badge-limite {
-            background: #a93226;
+            background: #e74c3c;
             margin-left: 5px;
         }
         .badge-modulo {
-            background: #5d6d3a;
+            background: #27ae60;
         }
         .grupo-botones {
             display: flex;
@@ -159,42 +147,41 @@ INTERFAZ_HTML = '''
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .tabla-datos th {
-            background: #34495e;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 12px;
             text-align: left;
-            font-weight: bold;
         }
         .tabla-datos td {
-            border: 1px solid #ecf0f1;
+            border: 1px solid #ddd;
             padding: 10px;
             background-color: white;
         }
         .tabla-datos tr:nth-child(even) td {
-            background-color: #f8f9fa;
+            background-color: #f9f9f9;
         }
         .tabla-datos tr:hover td {
-            background-color: #eef2f5;
+            background-color: #f0f0f0;
         }
-        .categoria-frutas { color: #5d6d3a; font-weight: bold; }
-        .categoria-carnes { color: #b8543a; font-weight: bold; }
-        .categoria-textiles { color: #4a6fa5; font-weight: bold; }
+        .categoria-frutas { color: #27ae60; font-weight: bold; }
+        .categoria-carnes { color: #e74c3c; font-weight: bold; }
+        .categoria-textiles { color: #8e44ad; font-weight: bold; }
         
         .menu-consultas {
             background: #f8f9fa;
-            border-radius: 12px;
+            border-radius: 15px;
             padding: 15px;
             margin-bottom: 20px;
             border: 1px solid #e0e0e0;
         }
         .menu-titulo {
             font-weight: bold;
-            color: #2c3e50;
+            color: #333;
             margin-bottom: 10px;
         }
         
@@ -211,35 +198,32 @@ INTERFAZ_HTML = '''
             padding: 12px;
             text-align: center;
             border-left: 4px solid;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .capacidad-card.frutas { border-left-color: #5d6d3a; }
-        .capacidad-card.carnes { border-left-color: #b8543a; }
-        .capacidad-card.textiles { border-left-color: #4a6fa5; }
-        .capacidad-card.total { border-left-color: #34495e; background: #eef2f5; }
+        .capacidad-card.frutas { border-left-color: #27ae60; }
+        .capacidad-card.carnes { border-left-color: #e74c3c; }
+        .capacidad-card.textiles { border-left-color: #8e44ad; }
+        .capacidad-card.total { border-left-color: #667eea; background: #e8eaf6; }
         .capacidad-numero {
             font-size: 24px;
             font-weight: bold;
-            color: #2c3e50;
         }
         .capacidad-label {
             font-size: 12px;
-            color: #7f8c8d;
+            color: #666;
         }
         .capacidad-alerta {
-            color: #a93226;
+            color: #e74c3c;
             font-size: 12px;
             margin-top: 5px;
         }
         
         .info-pasillos {
-            background: #eef2f5;
+            background: #e8eaf6;
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
             font-size: 14px;
             text-align: center;
-            color: #2c3e50;
         }
         
         .notificacion {
@@ -247,17 +231,17 @@ INTERFAZ_HTML = '''
             bottom: 30px;
             right: 30px;
             background: white;
-            border-radius: 12px;
+            border-radius: 20px;
             padding: 15px 25px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
             z-index: 1000;
             animation: slideIn 0.3s ease;
-            border-left: 5px solid #34495e;
+            border-left: 5px solid #667eea;
             max-width: 350px;
         }
-        .notificacion.exito { border-left-color: #5d6d3a; }
-        .notificacion.error { border-left-color: #a93226; }
-        .notificacion.alerta { border-left-color: #e67e22; }
+        .notificacion.exito { border-left-color: #27ae60; }
+        .notificacion.error { border-left-color: #e74c3c; }
+        .notificacion.alerta { border-left-color: #f39c12; }
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -265,32 +249,29 @@ INTERFAZ_HTML = '''
         .notificacion-titulo {
             font-weight: bold;
             margin-bottom: 5px;
-            color: #2c3e50;
         }
         .notificacion-mensaje {
             font-size: 14px;
-            color: #7f8c8d;
+            color: #555;
         }
         .notificacion-cerrar {
             float: right;
             cursor: pointer;
-            color: #bdc3c7;
+            color: #999;
         }
         
         .selector-vendedor {
-            background: #f8f9fa;
+            background: #f0f0f0;
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 15px;
-            border: 1px solid #ecf0f1;
         }
         .info-modulo {
-            background: #eef2f5;
+            background: #e8f5e9;
             padding: 10px;
             border-radius: 8px;
             font-size: 14px;
             margin-top: 10px;
-            color: #2c3e50;
         }
         .acciones-modulos {
             display: flex;
@@ -301,13 +282,12 @@ INTERFAZ_HTML = '''
             flex: 1;
         }
         .info-dimensiones {
-            background: #eef2f5;
+            background: #fff3e0;
             padding: 10px;
             border-radius: 8px;
             font-size: 13px;
             margin-top: 10px;
-            border-left: 4px solid #7f8c8d;
-            color: #2c3e50;
+            border-left: 4px solid #f39c12;
         }
         .tabla-container {
             overflow-x: auto;
@@ -321,19 +301,22 @@ INTERFAZ_HTML = '''
         <div style="text-align: center; margin-bottom: 20px;">
             <span class="badge">Sistema de Gestión de Mercados</span>
             <span class="badge badge-limite">Máximo 20 locales</span>
-            <span class="badge badge-modulo">📐 Módulo base: 5x5 m</span>
+            <span class="badge badge-modulo">📐 Ancho fijo: 5m | Largo: 5m, 10m, 15m, 20m</span>
         </div>
         
+        <!-- Información de pasillos por ID -->
         <div class="info-pasillos">
-            <strong>📍 Distribución de IDs por sector:</strong><br>
+            <strong>📍 Distribución de IDs por sector (pasillos):</strong><br>
             🥩 Carnes: IDs 1 al 8 &nbsp;&nbsp;|&nbsp;&nbsp;
             🥬 Frutas y Verduras: IDs 9 al 16 &nbsp;&nbsp;|&nbsp;&nbsp;
             👕 Textiles: IDs 17 al 20<br>
-            <span style="font-size: 12px;">⚠️ Los IDs se asignan automáticamente según el sector elegido</span>
+            <span style="font-size: 12px; color: #666;">⚠️ Los IDs se asignan automáticamente según el sector elegido</span>
         </div>
         
+        <!-- Indicadores de capacidad -->
         <div class="capacidad-container" id="capacidad-container"></div>
         
+        <!-- Menú de consultas -->
         <div class="menu-consultas">
             <div class="menu-titulo">📊 MENÚ DE CONSULTAS</div>
             <div class="grupo-botones">
@@ -344,6 +327,7 @@ INTERFAZ_HTML = '''
             </div>
         </div>
         
+        <!-- Sección donde se muestra la TABLA -->
         <div id="contenedor-tabla" style="display: none;">
             <h2>📋 Información de Puestos</h2>
             <div id="tabla-resultado" class="tabla-container"></div>
@@ -351,6 +335,7 @@ INTERFAZ_HTML = '''
         
         <hr>
         
+        <!-- Asignar nuevo vendedor -->
         <h2>📝 Asignar nuevo vendedor</h2>
         <select id="id_sector">
             <option value="2">🥩 Zona Carnes (IDs 1-8, Máx: 8 locales)</option>
@@ -366,8 +351,8 @@ INTERFAZ_HTML = '''
         </select>
         <button onclick="asignarVendedor()">➕ Asignar Vendedor</button>
 
+        <!-- Gestionar módulos -->
         <hr>
-        
         <h2>📦 Gestionar módulos de un vendedor</h2>
         <div class="selector-vendedor">
             <label>Seleccionar vendedor:</label>
@@ -384,7 +369,6 @@ INTERFAZ_HTML = '''
         </div>
         
         <hr>
-        
         <div class="info-dimensiones">
             <strong>📐 Esquema de dimensiones:</strong><br>
             • 1 módulo → 5m (ancho) x 5m (largo) = 25m²<br>
@@ -489,6 +473,12 @@ INTERFAZ_HTML = '''
             }
         }
         
+        function calcularDimensionesPorModulos(modulos) {
+            const ancho = 5;
+            const largo = modulos * 5;
+            return { ancho, largo, metros_cuadrados: ancho * largo };
+        }
+        
         function mostrarTabla(puestos, titulo) {
             const contenedor = document.getElementById('contenedor-tabla');
             const tablaDiv = document.getElementById('tabla-resultado');
@@ -499,10 +489,10 @@ INTERFAZ_HTML = '''
                 return;
             }
             
-            let html = `<h3>${titulo}</h3>`;
+            let html = `<h3 style="margin-bottom:10px;">${titulo}</h3>`;
             html += '<table class="tabla-datos"><thead><tr>' +
                         '<th>ID(s)</th><th>Vendedor</th><th>Giro</th><th>Sector</th><th>Módulos</th><th>Espacio total</th>' +
-                    '<tr></thead><tbody>';
+                    '</tr></thead><tbody>';
             
             const vendedoresMap = new Map();
             for (let puesto of puestos) {
@@ -537,7 +527,7 @@ INTERFAZ_HTML = '''
                             <td class="${claseColor}">${giroTexto}</td>
                             <td>${primerPuesto.sector_nombre || primerPuesto.id_sector}</td>
                             <td>${modulos} módulo(s)</td>
-                            <td>${espacioTotal} m²}(
+                            <td>${espacioTotal} m²</td>
                          </tr>`;
             }
             html += '</tbody></table>';
@@ -681,7 +671,7 @@ INTERFAZ_HTML = '''
                 mostrarNotificacion("Por favor selecciona un vendedor", "error");
                 return;
             }
-            if (confirm("⚠️ ¿Estás seguro de eliminar COMPLETAMENTE a este vendedor?")) {
+            if (confirm("⚠️ ¿Estás seguro de eliminar COMPLETAMENTE a este vendedor? Esta acción no se puede deshacer.")) {
                 try {
                     const response = await fetch(API_URL + '/vendedor/' + id + '/eliminar', { method: 'DELETE' });
                     const result = await response.json();
@@ -813,21 +803,27 @@ def aumentar_modulos(id):
         limite = LIMITES_SECTOR[puesto['id_sector']]["maximo"]
         conteo = contar_puestos_por_sector()
         disponibles = limite - conteo[puesto['id_sector']]
-        return jsonify({"error": f"No hay espacio disponible. Solo quedan {disponibles} espacios"}), 400
+        return jsonify({"error": f"No hay espacio disponible. Solo quedan {disponibles} espacios en este sector"}), 400
     nuevo_id = siguiente_id_disponible(puesto['id_sector'])
     if nuevo_id is None:
         rango = RANGOS_IDS[puesto['id_sector']]
-        return jsonify({"error": f"No hay IDs disponibles en el rango {rango['inicio']}-{rango['fin']}"}), 400
+        return jsonify({"error": f"No hay IDs disponibles en el rango {rango['inicio']}-{rango['fin']} para {rango['sector']}"}), 400
     nuevo_puesto = {
         "id": nuevo_id,
         "id_sector": puesto['id_sector'],
         "nombre_vendedor": puesto['nombre_vendedor'],
         "giro_negocio": puesto['giro_negocio'],
-        "dimensiones": {"ancho": 5, "largo": 5, "metros_cuadrados": 25}
+        "dimensiones": {
+            "ancho": 5,
+            "largo": 5,
+            "metros_cuadrados": 25
+        }
     }
     datos['puestos'].append(nuevo_puesto)
     guardar_datos(datos)
-    return jsonify({"mensaje": f"✅ Se agregó 1 módulo. Nuevo ID: {nuevo_id}"})
+    return jsonify({
+        "mensaje": f"✅ Se agregó 1 módulo a {puesto['nombre_vendedor']}. Ahora tiene {modulos_actuales + 1} módulos. Nuevo ID: {nuevo_id}"
+    })
 
 @app.route('/api/vendedor/<int:id>/reducir', methods=['PUT'])
 def reducir_modulos(id):
@@ -843,7 +839,9 @@ def reducir_modulos(id):
     puesto_a_eliminar = puestos_vendedor[-1]
     datos['puestos'] = [p for p in datos['puestos'] if p['id'] != puesto_a_eliminar['id']]
     guardar_datos(datos)
-    return jsonify({"mensaje": f"✅ Se eliminó 1 módulo. Ahora tiene {modulos_actuales - 1} módulos"})
+    return jsonify({
+        "mensaje": f"✅ Se eliminó 1 módulo de {puesto['nombre_vendedor']}. Ahora tiene {modulos_actuales - 1} módulos"
+    })
 
 @app.route('/api/vendedor/<int:id>/eliminar', methods=['DELETE'])
 def eliminar_vendedor_completo(id):
@@ -856,7 +854,9 @@ def eliminar_vendedor_completo(id):
     cantidad = len(puestos_a_eliminar)
     datos['puestos'] = [p for p in datos['puestos'] if p['nombre_vendedor'] != nombre_vendedor]
     guardar_datos(datos)
-    return jsonify({"mensaje": f"✅ Vendedor eliminado. Se liberaron {cantidad} módulo(s)."})
+    return jsonify({
+        "mensaje": f"✅ Vendedor '{nombre_vendedor}' eliminado completamente. Se liberaron {cantidad} módulo(s)."
+    })
 
 @app.route('/api/sectores', methods=['GET'])
 def listar_sectores():
@@ -900,19 +900,27 @@ def asignar_puesto():
         nuevo_id = siguiente_id_disponible(nueva_asignacion['id_sector'])
         if nuevo_id is None:
             rango = RANGOS_IDS[nueva_asignacion['id_sector']]
-            return jsonify({"error": f"No hay IDs disponibles en el rango {rango['inicio']}-{rango['fin']}"}), 400
+            return jsonify({"error": f"No hay IDs disponibles en el rango {rango['inicio']}-{rango['fin']} para {rango['sector']}"}), 400
         nuevos_ids.append(nuevo_id)
+        
         nuevo_puesto = {
             "id": nuevo_id,
             "id_sector": nueva_asignacion['id_sector'],
             "nombre_vendedor": nueva_asignacion['nombre_vendedor'],
             "giro_negocio": nueva_asignacion['giro_negocio'],
-            "dimensiones": {"ancho": 5, "largo": 5, "metros_cuadrados": 25}
+            "dimensiones": {
+                "ancho": 5,
+                "largo": 5,
+                "metros_cuadrados": 25
+            }
         }
         datos['puestos'].append(nuevo_puesto)
     
     guardar_datos(datos)
-    return jsonify({"mensaje": f"✅ {nueva_asignacion['nombre_vendedor']} asignado con {modulos} módulo(s) (IDs: {nuevos_ids})"}), 201
+    return jsonify({
+        "mensaje": f"✅ {nueva_asignacion['nombre_vendedor']} asignado con {modulos} módulo(s) (IDs: {nuevos_ids})",
+        "ids_asignados": nuevos_ids
+    }), 201
 
 @app.route('/api/inventario/categorias', methods=['GET'])
 def buscar_producto():
@@ -962,16 +970,17 @@ if __name__ == '__main__':
     print("=" * 50)
     print("📍 Interfaz web: http://localhost:5001")
     print("=" * 50)
-    print("📊 CONFIGURACIÓN DE PASAJES:")
+    print("📊 CONFIGURACIÓN DE PASAJES (RANGOS DE IDS):")
     print("   🥩 Carnes: IDs 1 al 8")
     print("   🥬 Frutas y Verduras: IDs 9 al 16")
     print("   👕 Textiles: IDs 17 al 20")
+    print("=" * 50)
+    print("📐 CONFIGURACIÓN DE DIMENSIONES:")
+    print("   • Ancho fijo: 5 metros")
+    print("   • Cada módulo: 5m x 5m = 25m²")
+    print("   • Máximo 4 módulos por vendedor")
     print("=" * 50)
     print("Presiona CTRL+C para detener el servidor")
     print("=" * 50)
     
     app.run(debug=True, host='0.0.0.0', port=5001)
-
-
-    se cambian los colores de las tablas, se hace
-    una reestructurasion visual del app.py
