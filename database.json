@@ -23,78 +23,61 @@
     {
       "id": 1,
       "id_sector": 1,
-      "nombre_vendedor": "juan perez",
+      "nombre_vendedor": "Juan Pérez",
       "giro_negocio": "frutas_verduras",
+      "modulo_numero": 1,
       "dimensiones": {
         "ancho": 5,
-        "largo": 20,
-        "metros_cuadrados": 100
+        "largo": 5,
+        "metros_cuadrados": 25
       }
     },
     {
       "id": 2,
       "id_sector": 1,
-      "nombre_vendedor": "juan perez",
+      "nombre_vendedor": "Juan Pérez",
       "giro_negocio": "frutas_verduras",
-      "dimensiones": {
-        "ancho": 5,
-        "largo": 20,
-        "metros_cuadrados": 100
-      }
-    },
-    {
-      "id": 3,
-      "id_sector": 1,
-      "nombre_vendedor": "juan perez",
-      "giro_negocio": "frutas_verduras",
-      "dimensiones": {
-        "ancho": 5,
-        "largo": 20,
-        "metros_cuadrados": 100
-      }
-    },
-    {
-      "id": 4,
-      "id_sector": 1,
-      "nombre_vendedor": "juan perez",
-      "giro_negocio": "frutas_verduras",
-      "dimensiones": {
-        "ancho": 5,
-        "largo": 20,
-        "metros_cuadrados": 100
-      }
-    },
-    {
-      "id": 5,
-      "id_sector": 2,
-      "nombre_vendedor": "macario roca",
-      "giro_negocio": "carnes",
-      "dimensiones": {
-        "ancho": 5,
-        "largo": 10,
-        "metros_cuadrados": 50
-      }
-    },
-    {
-      "id": 6,
-      "id_sector": 2,
-      "nombre_vendedor": "macario roca",
-      "giro_negocio": "carnes",
-      "dimensiones": {
-        "ancho": 5,
-        "largo": 10,
-        "metros_cuadrados": 50
-      }
-    },
-    {
-      "id": 7,
-      "id_sector": 3,
-      "nombre_vendedor": "mario brenes",
-      "giro_negocio": "textiles",
+      "modulo_numero": 2,
       "dimensiones": {
         "ancho": 5,
         "largo": 5,
         "metros_cuadrados": 25
+      }
+    },
+    {
+      "id": 3,
+      "id_sector": 2,
+      "nombre_vendedor": "Juan Pérez",
+      "giro_negocio": "carnes",
+      "modulo_numero": 1,
+      "dimensiones": {
+        "ancho": 5,
+        "largo": 5,
+        "metros_cuadrados": 25
+      }
+    },
+    {
+      "id": 4,
+      "id_sector": 3,
+      "nombre_vendedor": "María Gómez",
+      "giro_negocio": "textiles",
+      "modulo_numero": 1,
+      "dimensiones": {
+        "ancho": 5,
+        "largo": 10,
+        "metros_cuadrados": 50
+      }
+    },
+    {
+      "id": 5,
+      "id_sector": 3,
+      "nombre_vendedor": "María Gómez",
+      "giro_negocio": "textiles",
+      "modulo_numero": 2,
+      "dimensiones": {
+        "ancho": 5,
+        "largo": 10,
+        "metros_cuadrados": 50
       }
     }
   ]
