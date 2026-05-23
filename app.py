@@ -14,32 +14,8 @@ LIMITES_SECTOR = {
 }
 TOTAL_MAXIMO_LOCALES = 20
 
-# ============ CONFIGURACIÓN DE COMPATIBILIDAD (OPTIMIZADA) ============
-COMPATIBILIDAD = {
-    1: "frutas_verduras",
-    2: "carnes", 
-    3: "textiles"
-}
-
-SECTOR_NOMBRE = {
-    1: "Frutas y Verduras",
-    2: "Carnes",
-    3: "Textiles"
-}
-
-# Cache de sectores (evita leer el archivo JSON cada vez)
-_sectores_cache = None
-
-def obtener_sectores_cache():
-    global _sectores_cache
-    if _sectores_cache is None:
-        datos = leer_datos()
-        _sectores_cache = datos['sectores']
-    return _sectores_cache
-
-def validar_giro_rapido(id_sector, giro):
-    """Validación optimizada sin leer archivo JSON"""
-    return COMPATIBILIDAD.get(id_sector) == giro
+# Tamaño base del local (ancho fijo 5m, largo variable)
+ANCHO_FIJO = 5
 
 # ============ CONFIGURACIÓN DE PASAJES (RANGOS DE IDS) ============
 RANGOS_IDS = {
@@ -337,16 +313,6 @@ INTERFAZ_HTML = '''
             overflow-x: auto;
             margin-top: 15px;
         }
-        
-        .compatibilidad-info {
-            background: #e8f5e9;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            margin-top: 10px;
-            color: #2c3e50;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
@@ -398,9 +364,6 @@ INTERFAZ_HTML = '''
             <option value="3">3 módulos (5m x 15m = 75m²)</option>
             <option value="4">4 módulos (5m x 20m = 100m²)</option>
         </select>
-        <div class="compatibilidad-info">
-            🔍 Validación sanitaria: El giro del vendedor debe coincidir con la zona seleccionada
-        </div>
         <button onclick="asignarVendedor()">➕ Asignar Vendedor</button>
 
         <hr>
@@ -539,7 +502,7 @@ INTERFAZ_HTML = '''
             let html = `<h3>${titulo}</h3>`;
             html += '<table class="tabla-datos"><thead><tr>' +
                         '<th>ID(s)</th><th>Vendedor</th><th>Giro</th><th>Sector</th><th>Módulos</th><th>Espacio total</th>' +
-                    '</tr></thead><tbody>';
+                    '<tr></thead><tbody>';
             
             const vendedoresMap = new Map();
             for (let puesto of puestos) {
@@ -792,62 +755,6 @@ def obtener_capacidad():
         "total_ocupados": total_ocupados
     })
 
-# ============ ENDPOINTS OPTIMIZADOS DE CATEGORÍAS Y COMPATIBILIDAD ============
-
-@app.route('/api/sectores', methods=['GET'])
-def listar_sectores():
-    """Lista todos los sectores (con cache para mejor rendimiento)"""
-    sectores = obtener_sectores_cache()
-    return jsonify(sectores)
-
-@app.route('/api/sectores/detalle', methods=['GET'])
-def sectores_con_giros():
-    """Lista sectores con información de giros permitidos"""
-    sectores = obtener_sectores_cache()
-    resultado = []
-    for sector in sectores:
-        resultado.append({
-            "id": sector['id'],
-            "nombre": sector['nombre'],
-            "categoria": sector['categoria'],
-            "giros_permitidos": [sector['categoria']],
-            "descripcion": sector['descripcion']
-        })
-    return jsonify(resultado)
-
-@app.route('/api/compatibilidad/<int:id_sector>/<string:giro>', methods=['GET'])
-def verificar_compatibilidad(id_sector, giro):
-    """
-    Verifica si un giro comercial es compatible con un sector
-    Útil para validar antes de asignar
-    """
-    if id_sector not in COMPATIBILIDAD:
-        return jsonify({"error": "Sector no existe"}), 404
-    
-    compatible = (COMPATIBILIDAD[id_sector] == giro)
-    return jsonify({
-        "sector": SECTOR_NOMBRE[id_sector],
-        "sector_id": id_sector,
-        "giro_consultado": giro,
-        "giro_requerido": COMPATIBILIDAD[id_sector],
-        "compatible": compatible,
-        "mensaje": "✅ Giro compatible" if compatible else f"❌ '{giro}' no es compatible con {SECTOR_NOMBRE[id_sector]}. Se requiere '{COMPATIBILIDAD[id_sector]}'"
-    })
-
-@app.route('/api/giros/permitidos', methods=['GET'])
-def giros_permitidos():
-    """Lista todos los giros permitidos por sector"""
-    resultado = {}
-    for sector_id, giro in COMPATIBILIDAD.items():
-        resultado[SECTOR_NOMBRE[sector_id]] = {
-            "id": sector_id,
-            "giro": giro,
-            "giro_amigable": giro.replace('_', ' ').title()
-        }
-    return jsonify(resultado)
-
-# ============ ENDPOINTS DE VENDEDORES ============
-
 @app.route('/api/vendedores', methods=['GET'])
 def listar_vendedores():
     datos = leer_datos()
@@ -951,9 +858,8 @@ def eliminar_vendedor_completo(id):
     guardar_datos(datos)
     return jsonify({"mensaje": f"✅ Vendedor eliminado. Se liberaron {cantidad} módulo(s)."})
 
-@app.route('/api/sectores/raw', methods=['GET'])
-def listar_sectores_sin_cache():
-    """Versión sin cache por si se necesita refrescar"""
+@app.route('/api/sectores', methods=['GET'])
+def listar_sectores():
     datos = leer_datos()
     return jsonify(datos['sectores'])
 
@@ -980,14 +886,8 @@ def asignar_puesto():
     if not sector:
         return jsonify({"error": "El sector no existe"}), 404
     
-    # Validación optimizada de compatibilidad
-    if not validar_giro_rapido(nueva_asignacion['id_sector'], nueva_asignacion['giro_negocio']):
-        return jsonify({
-            "error": "❌ Incompatibilidad sanitaria",
-            "detalle": f"El giro '{nueva_asignacion['giro_negocio']}' no puede ubicarse en {SECTOR_NOMBRE[nueva_asignacion['id_sector']]}",
-            "giro_requerido": COMPATIBILIDAD[nueva_asignacion['id_sector']],
-            "sugerencia": f"Por favor seleccione el sector de {COMPATIBILIDAD[nueva_asignacion['id_sector']].replace('_', ' ')}"
-        }), 400
+    if nueva_asignacion['giro_negocio'] != sector['categoria']:
+        return jsonify({"error": f"❌ El giro no coincide con la zona '{sector['nombre']}'"}), 400
     
     if not verificar_cupo_disponible(nueva_asignacion['id_sector'], modulos):
         limite = LIMITES_SECTOR[nueva_asignacion['id_sector']]["maximo"]
@@ -1012,10 +912,7 @@ def asignar_puesto():
         datos['puestos'].append(nuevo_puesto)
     
     guardar_datos(datos)
-    return jsonify({
-        "mensaje": f"✅ {nueva_asignacion['nombre_vendedor']} asignado con {modulos} módulo(s) (IDs: {nuevos_ids})",
-        "ids_asignados": nuevos_ids
-    }), 201
+    return jsonify({"mensaje": f"✅ {nueva_asignacion['nombre_vendedor']} asignado con {modulos} módulo(s) (IDs: {nuevos_ids})"}), 201
 
 @app.route('/api/inventario/categorias', methods=['GET'])
 def buscar_producto():
@@ -1070,13 +967,11 @@ if __name__ == '__main__':
     print("   🥬 Frutas y Verduras: IDs 9 al 16")
     print("   👕 Textiles: IDs 17 al 20")
     print("=" * 50)
-    print("🔍 ENDPOINTS OPTIMIZADOS:")
-    print("   GET /api/sectores - Lista sectores (con cache)")
-    print("   GET /api/sectores/detalle - Sectores con giros permitidos")
-    print("   GET /api/compatibilidad/{id}/{giro} - Verifica compatibilidad")
-    print("   GET /api/giros/permitidos - Lista de giros por sector")
-    print("=" * 50)
     print("Presiona CTRL+C para detener el servidor")
     print("=" * 50)
     
     app.run(debug=True, host='0.0.0.0', port=5001)
+
+
+    se cambian los colores de las tablas, se hace
+    una reestructurasion visual del app.py
